@@ -39,11 +39,11 @@ import javax.xml.stream.XMLStreamWriter;
 public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter, XMLStreamConstants {
     private static final String NO_NAMESPACE = new String();
     private final XMLStreamWriter delegate;
-    private final ArrayDeque<ArgRunnable> attrQueue = new ArrayDeque<ArgRunnable>();
+    private final ArrayDeque<ArgRunnable> attrQueue = new ArrayDeque<>();
     private int level;
     private int state = START_DOCUMENT;
     private boolean indentEndElement = false;
-    private ArrayDeque<String> unspecifiedNamespaces = new ArrayDeque<String>();
+    private ArrayDeque<String> unspecifiedNamespaces = new ArrayDeque<>();
 
 
     public FormattingXMLStreamWriter(final XMLStreamWriter delegate) {
@@ -52,7 +52,7 @@ public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter,
     }
 
     private void nl() throws XMLStreamException {
-        delegate.writeCharacters("\n");
+        delegate.writeCharacters("\r\n");
     }
 
     private void indent() throws XMLStreamException {
@@ -96,13 +96,11 @@ public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter,
         runAttrQueue();
         nl();
         indent();
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                if (arg == 0) {
-                    delegate.writeStartElement(localName);
-                } else {
-                    delegate.writeEmptyElement(localName);
-                }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            if (arg == 0) {
+                delegate.writeStartElement(localName);
+            } else {
+                delegate.writeEmptyElement(localName);
             }
         });
 
@@ -119,13 +117,11 @@ public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter,
         runAttrQueue();
         nl();
         indent();
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                if (arg == 0) {
-                    delegate.writeStartElement(namespaceURI, localName);
-                } else {
-                    delegate.writeEmptyElement(namespaceURI, localName);
-                }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            if (arg == 0) {
+                delegate.writeStartElement(namespaceURI, localName);
+            } else {
+                delegate.writeEmptyElement(namespaceURI, localName);
             }
         });
         level++;
@@ -141,13 +137,11 @@ public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter,
         runAttrQueue();
         nl();
         indent();
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                if (arg == 0) {
-                    delegate.writeStartElement(prefix, namespaceURI, localName);
-                } else {
-                    delegate.writeEmptyElement(prefix, namespaceURI, localName);
-                }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            if (arg == 0) {
+                delegate.writeStartElement(prefix, namespaceURI, localName);
+            } else {
+                delegate.writeEmptyElement(prefix, namespaceURI, localName);
             }
         });
         level++;
@@ -241,104 +235,82 @@ public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter,
 
     @Override
     public void writeAttribute(final String localName, final String value) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                try {
-                    delegate.writeAttribute(localName, value);
-                } catch (XMLStreamException e) {
-                    throw new UndeclaredThrowableException(e);
-                }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            try {
+                delegate.writeAttribute(localName, value);
+            } catch (XMLStreamException e) {
+                throw new UndeclaredThrowableException(e);
             }
         });
     }
 
     @Override
     public void writeAttribute(final String prefix, final String namespaceURI, final String localName, final String value) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(prefix, namespaceURI, localName, value);
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(prefix, namespaceURI, localName, value);
         });
     }
 
     @Override
     public void writeAttribute(final String namespaceURI, final String localName, final String value) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(namespaceURI, localName, value);
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(namespaceURI, localName, value);
         });
     }
 
     @Override
     public void writeAttribute(final String localName, final String[] values) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(localName, join(values));
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(localName, join(values));
         });
     }
 
     @Override
     public void writeAttribute(final String prefix, final String namespaceURI, final String localName, final String[] values) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(prefix, namespaceURI, localName, join(values));
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(prefix, namespaceURI, localName, join(values));
         });
     }
 
     @Override
     public void writeAttribute(final String namespaceURI, final String localName, final String[] values) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(namespaceURI, localName, join(values));
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(namespaceURI, localName, join(values));
         });
     }
 
     @Override
     public void writeAttribute(final String localName, final Iterable<String> values) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(localName, join(values));
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(localName, join(values));
         });
     }
 
     @Override
     public void writeAttribute(final String prefix, final String namespaceURI, final String localName, final Iterable<String> values) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(prefix, namespaceURI, localName, join(values));
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(prefix, namespaceURI, localName, join(values));
         });
     }
 
     @Override
     public void writeAttribute(final String namespaceURI, final String localName, final Iterable<String> values) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeAttribute(namespaceURI, localName, join(values));
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeAttribute(namespaceURI, localName, join(values));
         });
     }
 
     @Override
     public void writeNamespace(final String prefix, final String namespaceURI) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeNamespace(prefix, namespaceURI);
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeNamespace(prefix, namespaceURI);
         });
     }
 
     @Override
     public void writeDefaultNamespace(final String namespaceURI) throws XMLStreamException {
-        attrQueue.add(new ArgRunnable() {
-            public void run(int arg) throws XMLStreamException {
-                delegate.writeDefaultNamespace(namespaceURI);
-            }
+        attrQueue.add((ArgRunnable) (int arg) -> {
+            delegate.writeDefaultNamespace(namespaceURI);
         });
     }
 
@@ -358,14 +330,14 @@ public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter,
                 state = COMMENT;
                 return;
             } else {
-                b.append('\n');
+                b.append("\r\n");
                 for (int q = 0; q < level; q++) {
                     b.append("    ");
                 }
                 b.append("  ~ ");
                 b.append(first);
                 do {
-                    b.append('\n');
+                    b.append("\r\n");
                     for (int q = 0; q < level; q++) {
                         b.append("    ");
                     }
@@ -373,7 +345,7 @@ public final class FormattingXMLStreamWriter implements XMLExtendedStreamWriter,
                     b.append(i.next());
                 } while (i.hasNext());
             }
-            b.append('\n');
+            b.append("\r\n");
             for (int q = 0; q < level; q ++) {
                 b.append("    ");
             }
